@@ -1,0 +1,32 @@
+pipeline {
+  environment {
+    imagename = "karthik/python:latest"
+    registryCredential = 'karthiksalavadi'
+    dockerImage = ''
+  }
+  agent any
+  stages {
+    stage('Cloning Git') {
+      steps {
+        git([url: 'git@github.com:karthiksalavadi/Jenkins-pipeline.git', branch: 'main', credentialsId: 'karthiksalavadi-github-user-token'])
+
+      }
+    }
+    stage('Building image') {
+      steps{
+        script {
+          dockerImage = docker.build karthik/python:latest
+        }
+      }
+    }
+    stage('Deploy Image') {
+      steps{
+        script {
+          docker.withRegistry( 'karthiksalavdi', registryCredential ) {
+            dockerImage.push("$BUILD_NUMBER")
+             dockerImage.push('latest')
+
+          }
+        }
+      }
+    }
